@@ -1,1 +1,53 @@
-Welcome {{ user.username }}
+<div>Welcome, {{ user.username }}</div>
+<div>
+    <div>Your create projects!</div>
+    <div>
+        {{#each projects as |project|}}
+            <div>
+                <a href="/project/{{project.id}}">
+                    <span>{{project.id}}</span>
+                    <span>{{project.name}}</span>
+                </a>
+            </div>
+        {{/each}}
+    </div>
+    <div>Create a project!</div>
+    <form id="project_form">
+        <div id="create_project_error"></div>
+        <div>Name: <input type="text" id="project_name" placeholder="Project Name"/></div>
+        <div>Description: <textarea placeholder="Project Description" id="project_description"></textarea></div>
+        <div>Goal: <input type="number" id="project_goal" placeholder="Project Goal"/></div>
+        <div>Fund By Date: <input type="date" id="project_date" placeholder="Fund By Date"/></div>
+        <button id="project_create_button">Create a Project!</button>
+    </form>
+</div>
+<script>
+    document.getElementById("project_form").addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const name = document.getElementById("project_name").value;
+        const description = document.getElementById("project_description").value;
+        let goal = document.getElementById("project_goal").value;
+        goal = parseInt(goal);
+        const fundBy = document.getElementById("project_date").value;
+
+        fetch('/api/project', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name,
+                description,
+                goal,
+                fundBy,
+            }),
+        }).then((result) => {
+            if (!result.ok) {
+                document.getElementById("create_project_error").textContent = "Could not create project";
+            } else {
+                window.location.reload();
+            }
+        });
+    });
+</script>

@@ -5,12 +5,13 @@ const cookieParser = require('cookie-parser');
 
 const sequelize = require('./config/connection');
 const mainRouter = require("./controllers");
+const helpers = require('./utils/helpers');
 
 const app = express();
 
 const PORT = process.env.PORT || 3001;
 
-app.engine('handlebars', engine());
+app.engine('handlebars', engine({ helpers }));
 app.set('view engine', 'handlebars');
 
 app.use(express.json());

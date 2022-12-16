@@ -71,7 +71,7 @@
                 document.getElementById("signup_errors").textContent = "Unable to create user";
                 return null;
             } else {
-                return result.json();
+                document.getElementById("signup_errors").textContent = "User created please login";
             }
         });
     });

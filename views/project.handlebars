@@ -1,0 +1,47 @@
+<div>
+    <div>Project {{project.name}} (#{{project.id}})</div>
+    {{#if isCreator}}
+        <a href="/project/{{project.id}}/edit">Edit Project</a>
+    {{/if}}
+    <div>
+        <pre>{{project.description}}</pre>
+    </div>
+    <div>Goal: {{project.goal}}</div>
+    <div>Funding deadline: {{better_date project.fundBy}}</div>
+    {{#if isLoggedIn }}
+        {{#unless isCreator }}
+            <form id="pledge_form">
+                <div id="pledge_error"></div>
+                <div>Pledge money to this great project!</div>
+                <div>Amount: <input type="number" id="pledge_amount"/></div>
+                <button id="pledge_button">
+                    Pledge!
+                </button>
+            </form>
+            <script>
+                document.getElementById("pledge_form").addEventListener("submit", (event) => {
+                    event.preventDefault();
+
+                    const amount = document.getElementById("pledge_amount").value;
+                    const amountNumber = parseInt(amount);
+
+                    fetch("/api/pledge", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            amount: amountNumber,
+                        }),
+                    }).then((result) => {
+                        if (!result.ok) {
+                            document.getElementById("pledge_error").textContent("Failed to do the pledge thing");
+                        } else {
+                            window.location.reload();
+                        }
+                    });
+                });
+            </script>
+        {{/unless}}
+    {{/if}}
+</div>

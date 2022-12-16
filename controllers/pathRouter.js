@@ -1,35 +1,49 @@
 const { Router } = require('express');
-const jwt = require('jsonwebtoken');
 
-const User = require('../models/User');
+const auth = require('../middleware/auth');
+const Project = require('../models/Project');
+const optionalAuth = require('../middleware/optionalAuth');
 
 const pathRouter = new Router();
 
-pathRouter.get('/', async (req, res) => {
-    const { logintoken } = req.cookies;
+pathRouter.get('/', auth, async (req, res) => {
+    const plainUser = req.user.get({ plain: true });
 
-    try {
-        const data = jwt.verify(logintoken, process.env.JWT_KEY);
-        const { id } = data;
+    const projects = await Project.findAll({
+        where: {
+            creatorId: req.user.id,
+        },
+    });
 
-        const user = await User.findByPk(id);
-        const plainUser = user.get({ plain: true })
+    const plainProjects = projects.map((project) => project.get({ plain: true }));
 
-        res.render('home', {
-            user: plainUser,
-        });
-    } catch (error) {
-        if (error.message === "invalid token" || error.message === "jwt must be provided") {
-            res.redirect('/login');
-        } else {
-            console.error(error);
-            res.status(500).end("Bad thing happen");
-        }
-    }
+    res.render('home', {
+        user: plainUser,
+        projects: plainProjects,
+    });
 });
 
 pathRouter.get('/login', (req, res) => {
     res.render('login');
+});
+
+pathRouter.get("/project/:id", optionalAuth, async (req, res) => {
+    const { id } = req.params;
+
+    const project = await Project.findByPk(id);
+
+    if (!project) {
+        res.status(404).end("No such project");
+        return;
+    }
+
+    const projectSimple = project.get({ simple: true });
+
+    res.render('project', {
+        project: projectSimple,
+        isCreator: req.user?.id === project.creatorId,
+        isLoggedIn: !!req.user,
+    });
 });
 
 module.exports = pathRouter;
