@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS funkytown;
+CREATE DATABASE funkytown;
