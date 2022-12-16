@@ -1,4 +1,6 @@
 <form id="login_form">
+    Login to the best crowdfund thing!
+    <div id="errors"></div>
     <div>
         Username: <input type="text" id="username" placeholder="Username Here" />
     </div>
@@ -9,6 +11,19 @@
         Login!
     </button>
 </form>
+<form id="signup_form">
+    We would be happy for you to signup to the best crowdfund thing.
+    <div id="signup_errors"></div>
+    <div>
+        Username: <input type="text" id="username_signup" placeholder="Username Here" />
+    </div>
+    <div>
+        Password: <input type="password" id="password_signup" placeholder="Password Here" />
+    </div>
+    <button>
+        Signup
+    </button>
+</form>
 <script>
     document.getElementById("login_form").addEventListener("submit", (event) => {
         event.preventDefault();
@@ -16,6 +31,7 @@
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
 
+        document.getElementById("errors").textContent = "";
         fetch("/api/user/login", {
             method: 'POST',
             headers: {
@@ -25,6 +41,38 @@
                 username,
                 password,
             }),
+        }).then((result) => {
+            if (!result.ok) {
+                document.getElementById("errors").textContent = "Unable to login";
+            } else {
+                window.location.replace('/');
+            }
+        });
+    });
+
+    document.getElementById("signup_form").addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const username = document.getElementById("username_signup").value;
+        const password = document.getElementById("password_signup").value;
+
+        document.getElementById("signup_errors").textContent = "";
+        fetch("/api/user", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username,
+                password,
+            }),
+        }).then((result) => {
+            if (!result.ok) {
+                document.getElementById("signup_errors").textContent = "Unable to create user";
+                return null;
+            } else {
+                return result.json();
+            }
         });
     });
 </script>
