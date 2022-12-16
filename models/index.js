@@ -14,4 +14,5 @@ Project.belongsToMany(User, { through: Pledge });
 module.exports = {
     User,
     Project,
+    Pledge,
 };

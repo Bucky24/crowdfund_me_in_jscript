@@ -6,13 +6,16 @@
     <div>
         <pre>{{project.description}}</pre>
     </div>
-    <div>Goal: {{project.goal}}</div>
+    <div>Goal: {{totalPledged}}/{{project.goal}}</div>
     <div>Funding deadline: {{better_date project.fundBy}}</div>
     {{#if isLoggedIn }}
         {{#unless isCreator }}
             <form id="pledge_form">
                 <div id="pledge_error"></div>
-                <div>Pledge money to this great project!</div>
+                {{#if userPledge}}
+                    <div>Thank you for you pledge of {{userPledge.amount}}. If you want to give more, you can do so below!</div>
+                {{/if}}
+                <div>Pledge {{#if userPledge}}more {{/if}}money to this great project!</div>
                 <div>Amount: <input type="number" id="pledge_amount"/></div>
                 <button id="pledge_button">
                     Pledge!
@@ -23,15 +26,16 @@
                     event.preventDefault();
 
                     const amount = document.getElementById("pledge_amount").value;
-                    const amountNumber = parseInt(amount);
+                    const amountNumber = parseInt(amount){{#if userPledge}} + {{userPledge.amount}}{{/if}};
 
-                    fetch("/api/pledge", {
-                        method: 'POST',
+                    fetch("/api/pledge{{#if userPledge}}/{{project.id}}{{/if}}", {
+                        method: '{{#if userPledge}}PUT{{else}}POST{{/if}}',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
                             amount: amountNumber,
+                            projectId: {{ project.id }},
                         }),
                     }).then((result) => {
                         if (!result.ok) {

@@ -1,7 +1,7 @@
 const { Router } = require('express');
 
 const auth = require('../middleware/auth');
-const Project = require('../models/Project');
+const { Project, Pledge, User } = require('../models');
 const optionalAuth = require('../middleware/optionalAuth');
 
 const pathRouter = new Router();
@@ -39,10 +39,33 @@ pathRouter.get("/project/:id", optionalAuth, async (req, res) => {
 
     const projectSimple = project.get({ simple: true });
 
+    const pledges = await Pledge.findAll({
+        where: {
+            ProjectId: id,
+        },
+    });
+
+    const totalPledged = pledges.reduce((sum, pledge) => {
+        return sum + pledge.amount;
+    }, 0);
+
+    let userPledge = null;
+    if (req.user) {
+        userPledge = await Pledge.findOne({
+            where: {
+                ProjectId: project.id,
+                UserId: req.user.id,
+            },
+        });
+        userPledge = userPledge.get({ simple: true });
+    }
+
     res.render('project', {
         project: projectSimple,
         isCreator: req.user?.id === project.creatorId,
         isLoggedIn: !!req.user,
+        userPledge,
+        totalPledged,
     });
 });
 
